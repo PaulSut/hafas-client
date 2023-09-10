@@ -26,6 +26,7 @@ import {formatLoyaltyCard} from './loyalty-cards.js'
 import {ageGroup, ageGroupFromAge} from './ageGroup.js'
 import {routingModes} from './routing-modes.js'
 
+
 const transformReqBody = (ctx, body) => {
 	const req = body.svcReqL[0] || {}
 
@@ -258,7 +259,37 @@ const parseLineWithAdditionalName = ({parsed}, l) => {
 	return parsed
 }
 
-const parseJourneyWithTickets = ({parsed}, j) => {
+const getDbOfferSelectionUrl = (journey, j) => {
+
+	// if no ticket contains addData, we can't get the offer selection url -> return journey
+	if (!journey.tickets.some((t) => t.addData1)) return journey
+
+	// url params
+	const A1='27'
+	const E='F'
+	const E1='2'
+	const K='2'
+	const M='D'
+	const RT1='E'
+	const SS=journey.legs[0].origin.id
+	const T=encodeURIComponent(journey.legs[0].departure)
+	const VH=encodeURIComponent(journey.refreshToken)
+	const ZS=journey.legs[journey.legs.length - 1].destination.id
+	const journeyOptions='0'
+	const journeyProducts='1023'
+	const optimize='1'
+	const returnurl='dbnavigator://restore'
+
+	journey.tickets.forEach((t) => {
+		const shpCtx=encodeURIComponent(JSON.parse(atob(t.addData1)).shpCtx)
+		const dbOfferSelectionUrl = `mobile.bahn.de/bin/mobil/query.exe/eox?A.1=${A1}&E=${E}&E.1=${E1}&K=${K}&M=${M}&RT.1=${RT1}&SS=${SS}&T=${T}&VH=${VH}&ZS=${ZS}&journeyOptions=${journeyOptions}&journeyProducts=${journeyProducts}&optimize=${optimize}&shpCtx=${shpCtx}&returnurl=${returnurl}`;
+		t.url = dbOfferSelectionUrl
+	})
+
+	return journey
+}
+
+const parseJourneyWithTickets = ({parsed, opt}, j) => {
 	if (
 		j.trfRes &&
 		Array.isArray(j.trfRes.fareSetL)
@@ -271,17 +302,25 @@ const parseJourneyWithTickets = ({parsed}, j) => {
 				if (!fare.ticketL) {
 					return {
 						name: fare.buttonText,
-						ticket: {price: fare.price}
+						price: {amount: fare.price}
 					}
 				}
 				// if refreshJourney()
 				else {
 					return {
 						name: fare.name,
-						ticket: fare.ticketL[0],
+						price: fare.ticketL[0].price,
+						addData1: s.addData,
+						addData2: fare.addData,
+						addData3: fare.ticketL[0].addData
 					}
 				}
 			}).filter(set => !!set)
+		if (j.trfRes.addData) {
+			parsed.tickets.addData = j.trfRes.addData
+		}
+
+		parsed = getDbOfferSelectionUrl(parsed, j)
 
 	}
 	return parsed

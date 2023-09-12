@@ -1,6 +1,7 @@
 // todo: use import assertions once they're supported by Node.js & ESLint
 // https://github.com/tc39/proposal-import-assertions
 import {createRequire} from 'module'
+
 const require = createRequire(import.meta.url)
 
 import trim from 'lodash/trim.js'
@@ -29,7 +30,7 @@ const transformReqBody = (ctx, body) => {
 	const req = body.svcReqL[0] || {}
 
 	// see https://pastebin.com/qZ9WS3Cx
-	const rtMode = ('routingMode' in ctx.opt) ? ctx.opt.routingMode :  routingModes.REALTIME
+	const rtMode = ('routingMode' in ctx.opt) ? ctx.opt.routingMode : routingModes.REALTIME
 
 	req.cfg = {
 		...req.cfg,
@@ -134,8 +135,8 @@ const parseLocWithDetails = ({parsed, common}, l) => {
 		})
 
 		let grids = l.gridL
-		.map(grid => parseGrid(grid, common))
-		.map(resolveCells)
+			.map(grid => parseGrid(grid, common))
+			.map(resolveCells)
 
 		const ausstattung = grids.find(g => slugg(g.title) === 'ausstattung')
 		if (ausstattung) {
@@ -174,9 +175,7 @@ const parseArrOrDepWithLoadFactor = ({parsed, res, opt}, d) => {
 	return parsed
 }
 
-const transformJourneysQuery = ({opt}, query) => {
-	const filters = query.jnyFltrL
-	if (opt.bike) filters.push(bike)
+const trfReq = (opt, refreshJourney) => {
 
 	if (('age' in opt) && ('ageGroup' in opt)) {
 		throw new TypeError(`\
@@ -186,10 +185,7 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 
 	const tvlrAgeGroup = ('age' in opt) ? ageGroupFromAge(opt.age) : opt.ageGroup
 
-	query.trfReq = {
-		// todo: what are these?
-		// "directESuiteCall": true,
-		// "rType": "DB-PE",
+	const basicCtrfReq = {
 
 		jnyCl: opt.firstClass === true ? 1 : 2,
 		// todo [breaking]: support multiple travelers
@@ -202,8 +198,75 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 		}],
 		cType: 'PK'
 	}
+	if ((refreshJourney) && (opt.tickets)) {
+		// todo: what are these?
+		// basicCtrfReq.directESuiteCall = true
+		// If called with "Reconstruction"
+		// 'DB-PE' causes the response to contain the tariff information.
+		basicCtrfReq.rType = 'DB-PE'
+	}
+	return basicCtrfReq
+}
+
+const transformJourneysQuery = ({opt}, query) => {
+	const filters = query.jnyFltrL
+	if (opt.bike) filters.push(bike)
+	query.trfReq = trfReq(opt, false)
 
 	return query
+}
+
+const formatRefreshJourneyReq = (ctx, refreshToken) => {
+	const {profile, opt} = ctx
+	const req = {
+		getIST: true,
+		getPasslist: !!opt.stopovers,
+		getPolyline: !!opt.polylines,
+		getTariff: !!opt.tickets
+	}
+	if (profile.refreshJourneyUseOutReconL) {
+		req.outReconL = [{ctx: refreshToken}]
+	} else {
+		req.ctxRecon = refreshToken
+	}
+	req.trfReq = trfReq(opt, true)
+
+	return {
+		meth: 'Reconstruction',
+		req,
+	}
+}
+
+const getDbOfferSelectionUrl = (journey, opt) => {
+
+	// if no ticket contains addData, we can't get the offer selection url -> return journey
+	if (!journey.tickets.some((t) => t.addData1)) return journey
+
+	// TODO: Find out what the follwoing parameters are for: E, M, RT1, journeyOptions, journeyProducts, optimize, returnurl
+	// url params
+	const A1 = opt.age
+	const E = 'F'
+	const E1 = formatLoyaltyCard(opt.loyaltyCard)
+	const K = opt.firstClass ? '1' : '2'
+	const M = 'D'
+	const RT1 = 'E'
+	const SS = journey.legs[0].origin.id
+	const T = encodeURIComponent(journey.legs[0].departure)
+	const VH = encodeURIComponent(journey.refreshToken)
+	const ZS = journey.legs[journey.legs.length - 1].destination.id
+	const journeyOptions = '0'
+	const journeyProducts = '1023'
+	const optimize = '1'
+	const returnurl = 'dbnavigator://'
+	const endpoint = opt.language === 'de' ? 'dox' : 'eox'
+
+	journey.tickets.forEach((t) => {
+		const shpCtx = encodeURIComponent(JSON.parse(atob(t.addData1)).shpCtx)
+		const dbOfferSelectionUrl = `mobile.bahn.de/bin/mobil/query.exe/${endpoint}?A.1=${A1}&E=${E}&E.1=${E1}&K=${K}&M=${M}&RT.1=${RT1}&SS=${SS}&T=${T}&VH=${VH}&ZS=${ZS}&journeyOptions=${journeyOptions}&journeyProducts=${journeyProducts}&optimize=${optimize}&shpCtx=${shpCtx}&returnurl=${returnurl}`;
+		t.url = dbOfferSelectionUrl
+	})
+
+	return journey
 }
 
 // todo: fix this
@@ -541,6 +604,7 @@ const profile = {
 	transformReqBody,
 	transformReq,
 	transformJourneysQuery,
+	formatRefreshJourneyReq,
 
 	products: products,
 

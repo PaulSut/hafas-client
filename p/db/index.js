@@ -241,7 +241,7 @@ const formatRefreshJourneyReq = (ctx, refreshToken) => {
 const getDbOfferSelectionUrl = (journey, opt) => {
 
 	// if no ticket contains addData, we can't get the offer selection url -> return journey
-	if (!journey.tickets.some((t) => t.addData1)) return journey
+	if (!journey.tickets.some((t) => t.addDataTicketInfo)) return journey
 
 	// TODO: Find out what the follwoing parameters are for: E, M, RT1, journeyOptions, journeyProducts, optimize, returnurl
 	// url params
@@ -262,7 +262,7 @@ const getDbOfferSelectionUrl = (journey, opt) => {
 	const endpoint = opt.language === 'de' ? 'dox' : 'eox'
 
 	journey.tickets.forEach((t) => {
-		const shpCtx = encodeURIComponent(JSON.parse(atob(t.addData1)).shpCtx)
+		const shpCtx = encodeURIComponent(JSON.parse(atob(t.addDataTicketInfo)).shpCtx)
 		const dbOfferSelectionUrl = `mobile.bahn.de/bin/mobil/query.exe/${endpoint}?A.1=${A1}&E=${E}&E.1=${E1}&K=${K}&M=${M}&RT.1=${RT1}&SS=${SS}&T=${T}&VH=${VH}&ZS=${ZS}&journeyOptions=${journeyOptions}&journeyProducts=${journeyProducts}&optimize=${optimize}&shpCtx=${shpCtx}&returnurl=${returnurl}`;
 		t.url = dbOfferSelectionUrl
 	})

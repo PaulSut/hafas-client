@@ -9,7 +9,7 @@ import {createClient} from '../../index.js'
 import {profile as dbProfile} from '../../p/db/index.js'
 import {routingModes} from '../../p/db/routing-modes.js'
 import {
-    createValidateStation,
+	createValidateStation,
 	createValidateTrip
 } from './lib/validators.js'
 import {createValidateFptfWith as createValidate} from './lib/validate-fptf-with.js'
@@ -57,6 +57,39 @@ const assertValidPrice = (t, p) => {
 	}
 }
 
+const assertValidTickets = (test, fare) => {
+	test.ok(fare);
+
+	if (fare.name !== undefined) {
+		test.equal(typeof fare.name, 'string');
+		test.ok(fare.name);
+	} else {
+		test.fail('Mandatory field "name" is missing');
+	}
+	if (fare.ticket !== undefined) {
+		if (fare.ticket.price !== undefined) {
+			if (fare.ticket.price.amount !== undefined) {
+				test.equal(typeof fare.ticket.price.amount, 'number');
+				test.ok(fare.ticket.price.amount > 0);
+			} else {
+				test.fail('Mandatory field "amount" in "price" is missing');
+			}
+			// Check optional currency field
+			if (fare.ticket.price.currency !== undefined) {
+				test.equal(typeof fare.ticket.price.currency, 'string');
+			}
+		} else {
+			test.fail('Mandatory field "price" in "ticket" is missing');
+		}
+		// Check optional addData field
+		if (fare.ticket.addData !== undefined) {
+			test.equal(typeof fare.ticket.addData, 'string');
+		}
+	} else {
+		test.fail('Mandatory field "ticket" is missing');
+	}
+};
+
 const client = createClient(dbProfile, 'public-transport/hafas-client:test')
 
 const berlinHbf = '8011160'
@@ -91,10 +124,29 @@ tap.test('journeys – Berlin Schwedter Str. to München Hbf', async (t) => {
 	// todo: find a journey where there pricing info is always available
 	for (let journey of res.journeys) {
 		if (journey.price) assertValidPrice(t, journey.price)
+		//if (journey.tickets) assertValidTickets(t, journey.tickets)
 	}
-
 	t.end()
 })
+//
+// tap.test('refreshJourney – valid tickets', async (t) => {
+// 	const journeysRes = await client.journeys(berlinHbf, münchenHbf, {
+// 		results: 4,
+// 		departure: when,
+// 		stopovers: true
+// 	})
+// 	const refreshWithoutTicketsRes = client.refreshJourney(journeysRes.journeys[0].refreshToken, {
+// 		tickets: false
+// 	})
+// 	const refreshWithTicketsRes = client.refreshJourney(journeysRes.journeys[0].refreshToken, {
+// 		tickets: true
+// 	})
+// 	const results = await Promise.all([refreshWithoutTicketsRes, refreshWithTicketsRes])
+// 	for (let res of results) {
+// 		if (res.tickets) assertValidTickets(t, res.tickets)
+// 	}
+// 	t.end()
+// })
 
 // todo: journeys, only one product
 
@@ -268,12 +320,12 @@ tap.skip('journeysFromTrip – U Mehringdamm to U Naturkundemuseum, reroute to S
 			})
 
 			const pastStopovers = t.stopovers
-			.filter(st => departureOf(st) < Date.now()) // todo: <= ?
+				.filter(st => departureOf(st) < Date.now()) // todo: <= ?
 			const hasStoppedAtA = pastStopovers
-			.find(sameStopOrStation({id: stopAId}))
+				.find(sameStopOrStation({id: stopAId}))
 			const willStopAtB = t.stopovers
-			.filter(st => arrivalOf(st) > Date.now()) // todo: >= ?
-			.find(sameStopOrStation({id: stopBId}))
+				.filter(st => arrivalOf(st) > Date.now()) // todo: >= ?
+				.find(sameStopOrStation({id: stopBId}))
 
 			if (hasStoppedAtA && willStopAtB) {
 				const prevStopover = maxBy(pastStopovers, departureOf)

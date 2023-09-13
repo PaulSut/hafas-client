@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0b42f93-f84d-40d3-9f0b-4a7271577a88" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/p/db/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/p/db/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/e2e/db.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/e2e/db.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +61,9 @@
       <workItem from="1694190975125" duration="9385000" />
       <workItem from="1694277813015" duration="12749000" />
       <workItem from="1694452541498" duration="4582000" />
-      <workItem from="1694534487836" duration="7273000" />
+      <workItem from="1694534487836" duration="8010000" />
+      <workItem from="1694591400617" duration="1606000" />
+      <workItem from="1694623665194" duration="3027000" />
     </task>
     <servers />
   </component>
@@ -77,5 +80,29 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/test/e2e/db.js</url>
+          <line>125</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/test/e2e/db.js</url>
+          <line>30</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/test/e2e/db.js</url>
+          <line>116</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

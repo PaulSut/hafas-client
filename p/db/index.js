@@ -326,14 +326,14 @@ const addTickets = (parsed, opt, j) => {
 				if (!fare.ticketL) {
 					return {
 						name: fare.buttonText,
-						price: {amount: fare.price}
+						priceObj: {amount: fare.price.amount}
 					}
 				}
 				// if refreshJourney()
 				else {
 					return {
 						name: fare.name,
-						price: fare.ticketL[0].price,
+						priceObj: fare.ticketL[0].price,
 						addDataTicketInfo: s.addData,
 						addDataTicketDetails: fare.addData,
 						addDataTravelInfo: fare.ticketL[0].addData

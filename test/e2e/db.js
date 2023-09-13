@@ -57,36 +57,37 @@ const assertValidPrice = (t, p) => {
 	}
 }
 
-const assertValidTickets = (test, fare) => {
-	test.ok(fare);
-
-	if (fare.name !== undefined) {
-		test.equal(typeof fare.name, 'string');
-		test.ok(fare.name);
-	} else {
-		test.fail('Mandatory field "name" is missing');
-	}
-	if (fare.ticket !== undefined) {
-		if (fare.ticket.price !== undefined) {
-			if (fare.ticket.price.amount !== undefined) {
-				test.equal(typeof fare.ticket.price.amount, 'number');
-				test.ok(fare.ticket.price.amount > 0);
+const assertValidTickets = (test, tickets) => {
+	test.ok(tickets);
+	for (let fare of tickets) {
+		if (fare.name !== undefined) {
+			test.equal(typeof fare.name, 'string');
+			test.ok(fare.name);
+		} else {
+			test.fail('Mandatory field "name" is missing');
+		}
+		if (fare.ticket !== undefined) {
+			if (fare.ticket.price !== undefined) {
+				if (fare.ticket.price.amount !== undefined) {
+					test.equal(typeof fare.ticket.price.amount, 'number');
+					test.ok(fare.ticket.price.amount > 0);
+				} else {
+					test.fail('Mandatory field "amount" in "price" is missing');
+				}
+				// Check optional currency field
+				if (fare.ticket.price.currency !== undefined) {
+					test.equal(typeof fare.ticket.price.currency, 'string');
+				}
 			} else {
-				test.fail('Mandatory field "amount" in "price" is missing');
+				test.fail('Mandatory field "price" in "ticket" is missing');
 			}
-			// Check optional currency field
-			if (fare.ticket.price.currency !== undefined) {
-				test.equal(typeof fare.ticket.price.currency, 'string');
+			// Check optional addData field
+			if (fare.ticket.addData !== undefined) {
+				test.equal(typeof fare.ticket.addData, 'string');
 			}
 		} else {
-			test.fail('Mandatory field "price" in "ticket" is missing');
+			test.fail('Mandatory field "ticket" is missing');
 		}
-		// Check optional addData field
-		if (fare.ticket.addData !== undefined) {
-			test.equal(typeof fare.ticket.addData, 'string');
-		}
-	} else {
-		test.fail('Mandatory field "ticket" is missing');
 	}
 };
 
@@ -128,25 +129,25 @@ tap.test('journeys – Berlin Schwedter Str. to München Hbf', async (t) => {
 	}
 	t.end()
 })
-//
-// tap.test('refreshJourney – valid tickets', async (t) => {
-// 	const journeysRes = await client.journeys(berlinHbf, münchenHbf, {
-// 		results: 4,
-// 		departure: when,
-// 		stopovers: true
-// 	})
-// 	const refreshWithoutTicketsRes = client.refreshJourney(journeysRes.journeys[0].refreshToken, {
-// 		tickets: false
-// 	})
-// 	const refreshWithTicketsRes = client.refreshJourney(journeysRes.journeys[0].refreshToken, {
-// 		tickets: true
-// 	})
-// 	const results = await Promise.all([refreshWithoutTicketsRes, refreshWithTicketsRes])
-// 	for (let res of results) {
-// 		if (res.tickets) assertValidTickets(t, res.tickets)
-// 	}
-// 	t.end()
-// })
+
+tap.test('refreshJourney – valid tickets', async (t) => {
+	const journeysRes = await client.journeys(berlinHbf, münchenHbf, {
+		results: 4,
+		departure: when,
+		stopovers: true
+	})
+	const refreshWithoutTicketsRes = client.refreshJourney(journeysRes.journeys[0].refreshToken, {
+		tickets: false
+	})
+	const refreshWithTicketsRes = client.refreshJourney(journeysRes.journeys[0].refreshToken, {
+		tickets: true
+	})
+	const results = await Promise.all([refreshWithoutTicketsRes, refreshWithTicketsRes])
+	for (let res of results) {
+		if (res.tickets) assertValidTickets(t, res.tickets)
+	}
+	t.end()
+})
 
 // todo: journeys, only one product
 

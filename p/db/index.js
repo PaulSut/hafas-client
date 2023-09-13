@@ -193,7 +193,7 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 		tvlrProf: [{
 			type: tvlrAgeGroup || ageGroup.ADULT,
 			...(('age' in opt) ? {age: opt.age} : {}),
-			redtnCard: opt.loyaltyCard
+			redtnCard: (opt.loyaltyCard)
 				? formatLoyaltyCard(opt.loyaltyCard)
 				: null
 		}],
@@ -247,7 +247,7 @@ const getDbOfferSelectionUrl = (journey, opt) => {
 	// url params
 	const A1 = opt.age
 	const E = 'F'
-	const E1 = formatLoyaltyCard(opt.loyaltyCard)
+	const E1 = opt.loyaltyCard ? formatLoyaltyCard(opt.loyaltyCard) : '0'
 	const K = opt.firstClass ? '1' : '2'
 	const M = 'D'
 	const RT1 = 'E'
@@ -342,6 +342,12 @@ const addTickets = (parsed, opt, j) => {
 			}).filter(set => !!set)
 		if (j.trfRes.addData) {
 			parsed.tickets.addData = j.trfRes.addData
+		}
+		// add price info, workaround to avoid breaking changes
+		if (parsed.tickets.length >0 && !parsed.price) {
+			parsed.price = parsed.tickets[0].price
+			parsed.price.amount = parsed.price.amount / 100
+			parsed.price.currency = 'EUR'
 		}
 	}
 	parsed = getDbOfferSelectionUrl(parsed, opt)

@@ -345,7 +345,7 @@ const addTickets = (parsed, opt, j) => {
 		}
 		// add price info, workaround to avoid breaking changes
 		if (parsed.tickets.length >0 && !parsed.price) {
-			parsed.price = parsed.tickets[0].price
+			parsed.price = parsed.tickets[0].priceObj
 			parsed.price.amount = parsed.price.amount / 100
 			parsed.price.currency = 'EUR'
 		}

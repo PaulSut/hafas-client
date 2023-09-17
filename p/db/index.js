@@ -25,7 +25,6 @@ import {products} from './products.js'
 import {formatLoyaltyCard} from './loyalty-cards.js'
 import {ageGroup, ageGroupFromAge} from './ageGroup.js'
 import {routingModes} from './routing-modes.js'
-import {addAssert} from "tap";
 
 const transformReqBody = (ctx, body) => {
 	const req = body.svcReqL[0] || {}

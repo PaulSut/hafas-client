@@ -327,6 +327,7 @@ const addTickets = (parsed, opt, j) => {
 		j.trfRes &&
 		Array.isArray(j.trfRes.fareSetL)
 	) {
+		const addData = j.trfRes.fareSetL[0].addData
 		parsed.tickets = j.trfRes.fareSetL
 			.map((s) => {
 				if (!Array.isArray(s.fareL) || s.fareL.length === 0) return null
@@ -343,15 +344,13 @@ const addTickets = (parsed, opt, j) => {
 					return {
 						name: fare.name,
 						priceObj: fare.ticketL[0].price,
+						addData: addData,
 						addDataTicketInfo: s.addData,
 						addDataTicketDetails: fare.addData,
 						addDataTravelInfo: fare.ticketL[0].addData
 					}
 				}
 			}).filter(set => !!set)
-		if (j.trfRes.addData) {
-			parsed.tickets.addData = j.trfRes.addData
-		}
 		// add price info, to avoid breaking changes
 		if (parsed.tickets.length >0 && !parsed.price) {
 			parsed.price = {

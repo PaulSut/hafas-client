@@ -349,8 +349,8 @@ const addTickets = (parsed, opt, j) => {
 			parsed.price.amount = parsed.price.amount / 100
 			parsed.price.currency = 'EUR'
 		}
+		parsed = getDbOfferSelectionUrl(parsed, opt)
 	}
-	parsed = getDbOfferSelectionUrl(parsed, opt)
 	return parsed
 }
 

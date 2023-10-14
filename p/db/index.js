@@ -193,7 +193,9 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 			type: tvlrAgeGroup || ageGroup.ADULT,
 			...(('age' in opt) ? {age: opt.age} : {}),
 			redtnCard: (opt.loyaltyCard)
-				? formatLoyaltyCard(opt.loyaltyCard)
+				? (typeof opt.loyaltyCard === 'number' && Number.isInteger(opt.loyaltyCard)
+					? opt.loyaltyCard
+					: formatLoyaltyCard(opt.loyaltyCard))
 				: null
 		}],
 		cType: 'PK'
@@ -342,7 +344,7 @@ const addTickets = (parsed, opt, j) => {
 				}
 			}).filter(set => !!set)
 		// add price info, workaround to avoid breaking changes
-		if (parsed.tickets.length >0 && !parsed.price) {
+		if (parsed.tickets.length > 0 && !parsed.price) {
 			parsed.price = parsed.tickets[0].priceObj
 			parsed.price.amount = parsed.price.amount / 100
 			parsed.price.currency = 'EUR'

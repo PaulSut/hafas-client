@@ -241,36 +241,34 @@ const formatRefreshJourneyReq = (ctx, refreshToken) => {
 
 const getDbOfferSelectionUrl = (journey, opt) => {
 
-  // if no ticket contains addData, we can't get the offer selection URL -> return journey
-  if (!journey.tickets.some((t) => t.addDataTicketInfo)) return journey;
+	// if no ticket contains addData, we can't get the offer selection url -> return journey
+	if (!journey.tickets.some((t) => t.addDataTicketInfo)) return journey
 
-  const queryParams = new URLSearchParams();
+	// TODO: Find out what the follwoing parameters are for: E, M, RT1, journeyOptions, journeyProducts, optimize, returnurl
+	// url params
+	const A1 = opt.age
+	const E = 'F'
+	const E1 = opt.loyaltyCard ? formatLoyaltyCard(opt.loyaltyCard) : '0'
+	const K = opt.firstClass ? '1' : '2'
+	const M = 'D'
+	const RT1 = 'E'
+	const SS = journey.legs[0].origin.id
+	const T = encodeURIComponent(journey.legs[0].departure)
+	const VH = encodeURIComponent(journey.refreshToken)
+	const ZS = journey.legs[journey.legs.length - 1].destination.id
+	const journeyOptions = '0'
+	const journeyProducts = '1023'
+	const optimize = '1'
+	const returnurl = 'dbnavigator://'
+	const endpoint = opt.language === 'de' ? 'dox' : 'eox'
 
-  // Add individual parameters
-  queryParams.append('A.1', opt.age);
-  queryParams.append('E', 'F');
-  queryParams.append('E.1', opt.loyaltyCard ? formatLoyaltyCard(opt.loyaltyCard) : '0');
-  queryParams.append('K', opt.firstClass ? '1' : '2');
-  queryParams.append('M', 'D');
-  queryParams.append('RT.1', 'E');
-  queryParams.append('SS', journey.legs[0].origin.id);
-  queryParams.append('T', journey.legs[0].departure);
-  queryParams.append('VH', journey.refreshToken);
-  queryParams.append('ZS', journey.legs[journey.legs.length - 1].destination.id);
-  queryParams.append('journeyOptions', '0');
-  queryParams.append('journeyProducts', '1023');
-  queryParams.append('optimize', '1');
-  queryParams.append('returnurl', 'dbnavigator://');
-  const endpoint = opt.language === 'de' ? 'dox' : 'eox';
+	journey.tickets.forEach((t) => {
+		const shpCtx = encodeURIComponent(JSON.parse(atob(t.addDataTicketInfo)).shpCtx)
+		const dbOfferSelectionUrl = `mobile.bahn.de/bin/mobil/query.exe/${endpoint}?A.1=${A1}&E=${E}&E.1=${E1}&K=${K}&M=${M}&RT.1=${RT1}&SS=${SS}&T=${T}&VH=${VH}&ZS=${ZS}&journeyOptions=${journeyOptions}&journeyProducts=${journeyProducts}&optimize=${optimize}&shpCtx=${shpCtx}&returnurl=${returnurl}`;
+		t.url = dbOfferSelectionUrl
+	})
 
-  journey.tickets.forEach((t) => {
-    const shpCtx = encodeURIComponent(JSON.parse(atob(t.addDataTicketInfo)).shpCtx);
-    queryParams.append('shpCtx', shpCtx);
-    t.url = `https://mobile.bahn.de/bin/mobil/query.exe/${endpoint}?${queryParams.toString()}`;
-    queryParams.delete('shpCtx'); // Remove shpCtx parameter for the next iteration
-  });
-
-  return journey;
+	return journey
 }
 
 // todo: fix this

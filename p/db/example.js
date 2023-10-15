@@ -1,15 +1,18 @@
 import {inspect} from 'util'
 import {createClient} from '../../index.js'
 import {profile as dbProfile} from './index.js'
+import {data as loyaltyCards} from './loyalty-cards.js'
+
 
 // Pick a descriptive user agent! hafas-client won't work with this string.
-const client = createClient(dbProfile, 'hafas-client-example')
+const client = createClient(dbProfile, 'hafas-client-example@hafas-client.de')
 
 const berlinJungfernheide = '8011167'
 const münchenHbf = '8000261'
 const regensburgHbf = '8000309'
+const berlinHbf = '8011160'
 
-let data = await client.locations('Berlin Jungfernheide')
+//let data = await client.locations('Berlin Jungfernheide')
 // let data = await client.locations('Atze Musiktheater', {
 // 	poi: true,
 // 	addressses: false,
@@ -35,22 +38,28 @@ let data = await client.locations('Berlin Jungfernheide')
 // let data = await client.departures(berlinJungfernheide, {duration: 1})
 // let data = await client.arrivals(berlinJungfernheide, {duration: 10, linesOfStops: true})
 
-// let data = await client.journeys(berlinJungfernheide, münchenHbf, {
-// 	results: 1,
-// 	tickets: true,
-// })
+let data = await client.journeys(münchenHbf, berlinHbf, {
+	departure: new Date('2023-12-12T16:00:00'),
+	results: 5,
+	tickets: true,
+	age: 28,
+	loyaltyCard: 4,
+	firstClass: true,
+})
 // {
 // 	const [journey] = data.journeys
 // 	const leg = journey.legs[0]
 // 	data = await client.trip(leg.tripId, {polyline: true})
 // }
 // {
-// 	const [journey] = data.journeys
-// 	data = await client.refreshJourney(journey.refreshToken, {
-// 		stopovers: true,
-// 		remarks: true,
-// 	})
-// }
+const journey = data.journeys[0]
+data = await client.refreshJourney(journey.refreshToken, {
+	stopovers: true,
+	remarks: true,
+	tickets: true,
+	firstClass: true,
+})
+
 
 // let data = await client.radar({
 // 	north: 52.52411,

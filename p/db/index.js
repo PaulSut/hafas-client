@@ -322,6 +322,11 @@ const addPrice = (parsed, raw) => {
 	return parsed
 }
 
+const isFirstClassTicket = (addData, opt) => {
+	const addDataJson = JSON.parse(atob(addData));
+	return !!(addDataJson.Upsell === 'S1' || opt.firstClass);
+};
+
 const addTickets = (parsed, opt, j) => {
 	if (
 		j.trfRes &&
@@ -347,7 +352,8 @@ const addTickets = (parsed, opt, j) => {
 						addData: addData,
 						addDataTicketInfo: s.addData,
 						addDataTicketDetails: fare.addData,
-						addDataTravelInfo: fare.ticketL[0].addData
+						addDataTravelInfo: fare.ticketL[0].addData,
+						firstClass: isFirstClassTicket(s.addData, opt)
 					}
 				}
 			}).filter(set => !!set)

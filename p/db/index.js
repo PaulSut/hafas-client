@@ -257,10 +257,6 @@ const getDbOfferSelectionUrl = (journey, opt) => {
 	queryParams.append('T', journey.legs[0].departure);
 	queryParams.append('VH', journey.refreshToken);
 	queryParams.append('ZS', journey.legs[journey.legs.length - 1].destination.id);
-	queryParams.append('journeyOptions', '0');
-	queryParams.append('journeyProducts', '1023');
-	queryParams.append('optimize', '1');
-	queryParams.append('returnurl', 'dbnavigator://');
 	const endpoint = opt.language === 'de' ? 'dox' : 'eox';
 
 	journey.tickets.forEach((t) => {

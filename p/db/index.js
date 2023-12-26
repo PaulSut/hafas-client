@@ -230,7 +230,7 @@ const parseLineWithAdditionalName = ({parsed}, l) => {
 
 // todo: sotRating, conSubscr, isSotCon, showARSLink, sotCtxt
 // todo: conSubscr, showARSLink, useableTime
-const parseJourneyWithPrice = ({parsed}, raw) => {
+const addPrice = ({parsed}, raw) => {
 	parsed.price = null
 	// todo: find cheapest, find discounts
 	// todo: write a parser like vbb-parse-ticket
@@ -290,6 +290,46 @@ const parseJourneyWithPrice = ({parsed}, raw) => {
 		}
 	}
 
+	return parsed
+}
+
+const addTickets = (parsed, opt, j) => {
+	if (
+		j.trfRes &&
+		Array.isArray(j.trfRes.fareSetL)
+	) {
+		parsed.tickets = j.trfRes.fareSetL
+			.map((s) => {
+				if (!Array.isArray(s.fareL) || s.fareL.length === 0) return null
+				// if journeys()
+				const fare = s.fareL[0]
+				if (!fare.ticketL) {
+					return {
+						name: fare.buttonText,
+						priceObj: {amount: fare.price.amount}
+					}
+				}
+				// if refreshJourney()
+				else {
+					return {
+						name: fare.name,
+						priceObj: fare.ticketL[0].price,
+						addDataTicketInfo: s.addData,
+						addDataTicketDetails: fare.addData,
+						addDataTravelInfo: fare.ticketL[0].addData
+					}
+				}
+			}).filter(set => !!set)
+		if (j.trfRes.addData) {
+			parsed.tickets.addData = j.trfRes.addData
+		}
+	}
+	return parsed
+}
+
+const parseJourneyWithPriceAndTickets = ({parsed, opt}, raw) => {
+	parsed = addPrice(parsed, raw)
+	parsed = addTickets(parsed, opt, raw)
 	return parsed
 }
 
@@ -545,7 +585,7 @@ const profile = {
 	products: products,
 
 	parseLocation: parseHook(_parseLocation, parseLocWithDetails),
-	parseJourney: parseHook(_parseJourney, parseJourneyWithPrice),
+	parseJourney: parseHook(_parseJourney, parseJourneyWithPriceAndTickets),
 	parseJourneyLeg: parseHook(_parseJourneyLeg, parseJourneyLegWithLoadFactor),
 	parseLine: parseHook(_parseLine, parseLineWithAdditionalName),
 	parseArrival: parseHook(_parseArrival, parseArrOrDepWithLoadFactor),

@@ -352,6 +352,14 @@ const addTickets = (parsed, opt, j) => {
 		if (j.trfRes.addData) {
 			parsed.tickets.addData = j.trfRes.addData
 		}
+		// add price info, to avoid breaking changes
+		if (parsed.tickets.length >0 && !parsed.price) {
+			parsed.price = {
+				...parsed.tickets[0].priceObj,
+				amount: parsed.tickets[0].priceObj.amount / 100,
+				currency: 'EUR'
+			};
+		}
 	}
 	return parsed
 }

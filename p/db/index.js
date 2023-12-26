@@ -174,9 +174,7 @@ const parseArrOrDepWithLoadFactor = ({parsed, res, opt}, d) => {
 	return parsed
 }
 
-const transformJourneysQuery = ({opt}, query) => {
-	const filters = query.jnyFltrL
-	if (opt.bike) filters.push(bike)
+const trfReq = (opt, refreshJourney) => {
 
 	if (('age' in opt) && ('ageGroup' in opt)) {
 		throw new TypeError(`\
@@ -186,11 +184,7 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 
 	const tvlrAgeGroup = ('age' in opt) ? ageGroupFromAge(opt.age) : opt.ageGroup
 
-	query.trfReq = {
-		// todo: what are these?
-		// "directESuiteCall": true,
-		// "rType": "DB-PE",
-
+	const basicCtrfReq = {
 		jnyCl: opt.firstClass === true ? 1 : 2,
 		// todo [breaking]: support multiple travelers
 		tvlrProf: [{
@@ -202,8 +196,43 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 		}],
 		cType: 'PK'
 	}
+	if ((refreshJourney) && (opt.tickets)) {
+		// todo: what are these?
+		// basicCtrfReq.directESuiteCall = true
+		// If called with "Reconstruction"
+		// 'DB-PE' causes the response to contain the tariff information.
+		basicCtrfReq.rType = 'DB-PE'
+	}
+	return basicCtrfReq
+}
+
+const transformJourneysQuery = ({opt}, query) => {
+	const filters = query.jnyFltrL
+	if (opt.bike) filters.push(bike)
+	query.trfReq = trfReq(opt, false)
 
 	return query
+}
+
+const formatRefreshJourneyReq = (ctx, refreshToken) => {
+	const {profile, opt} = ctx
+	const req = {
+		getIST: true,
+		getPasslist: !!opt.stopovers,
+		getPolyline: !!opt.polylines,
+		getTariff: !!opt.tickets
+	}
+	if (profile.refreshJourneyUseOutReconL) {
+		req.outReconL = [{ctx: refreshToken}]
+	} else {
+		req.ctxRecon = refreshToken
+	}
+	req.trfReq = trfReq(opt, true)
+
+	return {
+		meth: 'Reconstruction',
+		req,
+	}
 }
 
 // todo: fix this
@@ -230,7 +259,7 @@ const parseLineWithAdditionalName = ({parsed}, l) => {
 
 // todo: sotRating, conSubscr, isSotCon, showARSLink, sotCtxt
 // todo: conSubscr, showARSLink, useableTime
-const addPrice = ({parsed}, raw) => {
+const addPrice = (parsed, raw) => {
 	parsed.price = null
 	// todo: find cheapest, find discounts
 	// todo: write a parser like vbb-parse-ticket
@@ -581,6 +610,7 @@ const profile = {
 	transformReqBody,
 	transformReq,
 	transformJourneysQuery,
+	formatRefreshJourneyReq,
 
 	products: products,
 

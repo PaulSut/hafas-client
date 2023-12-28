@@ -191,7 +191,9 @@ Pass in just opt.age, and the age group will calculated automatically.`)
 			type: tvlrAgeGroup || ageGroup.ADULT,
 			...(('age' in opt) ? {age: opt.age} : {}),
 			redtnCard: opt.loyaltyCard
-				? formatLoyaltyCard(opt.loyaltyCard)
+				? (typeof opt.loyaltyCard === 'number' && Number.isInteger(opt.loyaltyCard)
+					? opt.loyaltyCard
+					: formatLoyaltyCard(opt.loyaltyCard))
 				: null
 		}],
 		cType: 'PK'

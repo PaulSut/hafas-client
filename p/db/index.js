@@ -325,6 +325,9 @@ const addPrice = (parsed, raw) => {
 }
 
 const isFirstClassTicket = (addData, opt) => {
+	// if addData is undefined, it is assumed that the ticket is not first class
+	// (this is the case for S-Bahn tickets)
+	if (!addData) return false;
 	const addDataJson = JSON.parse(atob(addData));
 	return !!(addDataJson.Upsell === 'S1' || opt.firstClass);
 };
@@ -349,7 +352,7 @@ const addTickets = (parsed, opt, j) => {
 				// if refreshJourney()
 				else {
 					return {
-						name: fare.name,
+						name: fare.name || fare.ticketL[0].name,
 						priceObj: fare.ticketL[0].price,
 						addData: addData,
 						addDataTicketInfo: s.addData,

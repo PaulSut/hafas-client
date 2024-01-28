@@ -320,8 +320,6 @@ const addPrice = (parsed, raw) => {
 			}
 		}
 	}
-
-	return parsed
 }
 
 const isFirstClassTicket = (addData, opt) => {
@@ -376,12 +374,11 @@ const addTickets = (parsed, opt, j) => {
 			};
 		}
 	}
-	return parsed
 }
 
 const parseJourneyWithPriceAndTickets = ({parsed, opt}, raw) => {
-	parsed = addPrice(parsed, raw)
-	parsed = addTickets(parsed, opt, raw)
+	addPrice(parsed, raw)
+	addTickets(parsed, opt, raw)
 	return parsed
 }
 

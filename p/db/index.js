@@ -343,8 +343,8 @@ const addTickets = (parsed, opt, j) => {
 	) {
 		const addData = j.trfRes.fareSetL[0].addData
 		parsed.tickets = j.trfRes.fareSetL
+			.filter(s => Array.isArray(s.fareL) && s.fareL.length > 0)
 			.map((s) => {
-				if (!Array.isArray(s.fareL) || s.fareL.length === 0) return null
 				// if journeys()
 				const fare = s.fareL[0]
 				if (!fare.ticketL) {

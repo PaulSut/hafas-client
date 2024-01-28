@@ -23,7 +23,25 @@ const formatLoyaltyCard = (data) => {
 	return 0
 }
 
+const reverseFormatLoyaltyCard = (cardId) => {
+    switch (cardId) {
+        case 1:
+        case 2: return { type: c.BAHNCARD, discount: 25, class: cardId === 1 ? 1 : 2 };
+        case 3:
+        case 4: return { type: c.BAHNCARD, discount: 50, class: cardId === 3 ? 1 : 2 };
+        case 9: return { type: c.VORTEILSCARD };
+        case 10:
+        case 11: return { type: c.HALBTAXABO, railplus: cardId === 10 };
+        case 12:
+        case 13: return { type: c.VOORDEELURENABO, railplus: cardId === 12 };
+        case 14: return { type: c.SHCARD };
+        case 15: return { type: c.GENERALABONNEMENT };
+        default: return { type: c.NONE };
+    }
+}
+
 export {
 	c as data,
 	formatLoyaltyCard,
+	reverseFormatLoyaltyCard,
 }

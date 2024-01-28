@@ -334,7 +334,6 @@ const isFirstClassTicket = (addData, opt) => {
 	} catch (err) {
 		return false;
 	}
-	return !!(addDataJson.Upsell === 'S1' || opt.firstClass);
 };
 
 const addTickets = (parsed, opt, j) => {

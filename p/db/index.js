@@ -363,6 +363,7 @@ const addTickets = (parsed, opt, j) => {
 				}
 			}).filter(set => !!set)
 		// add price info, to avoid breaking changes
+		// todo [breaking]: remove this format
 		if (parsed.tickets.length >0 && !parsed.price) {
 			parsed.price = {
 				...parsed.tickets[0].priceObj,

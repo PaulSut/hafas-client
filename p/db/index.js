@@ -299,7 +299,7 @@ const parseLineWithAdditionalName = ({parsed}, l) => {
 
 // todo: sotRating, conSubscr, isSotCon, showARSLink, sotCtxt
 // todo: conSubscr, showARSLink, useableTime
-const addPrice = (parsed, raw) => {
+const mutateToAddPrice = (parsed, raw) => {
 	parsed.price = null
 	// todo: find cheapest, find discounts
 	// todo: write a parser like vbb-parse-ticket
@@ -372,7 +372,7 @@ const isFirstClassTicket = (addData, opt) => {
 	}
 };
 
-const addTickets = (parsed, opt, j) => {
+const mutateToAddTickets = (parsed, opt, j) => {
 	if (
 		j.trfRes &&
 		Array.isArray(j.trfRes.fareSetL)
@@ -419,8 +419,8 @@ const addTickets = (parsed, opt, j) => {
 }
 
 const parseJourneyWithPriceAndTickets = ({parsed, opt}, raw) => {
-	addPrice(parsed, raw)
-	addTickets(parsed, opt, raw)
+	mutateToAddPrice(parsed, raw)
+	mutateToAddTickets(parsed, opt, raw)
 	return parsed
 }
 

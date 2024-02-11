@@ -233,6 +233,15 @@ const formatRefreshJourneyReq = (ctx, refreshToken) => {
 	}
 }
 
+const parseShpCtx = (addDataTicketInfo) => {
+    try {
+        return JSON.parse(atob(addDataTicketInfo)).shpCtx;
+    } catch (e) {
+        // in case addDataTicketInfo is not a valid base64 string
+        return null;
+    }
+}
+
 
 const addDbOfferSelectionUrl = (journey, opt) => {
 
@@ -259,19 +268,13 @@ const addDbOfferSelectionUrl = (journey, opt) => {
 		const endpoint = opt.language === 'de' ? 'dox' : 'eox';
 
 		journey.tickets.forEach((t) => {
-			try {
-				const shpCtx = JSON.parse(atob(t.addDataTicketInfo)).shpCtx;
-				const newUrl = new URL(endpoint, 'https://mobile.bahn.de/bin/mobil/query.exe/');
-				newUrl.searchParams = new URLSearchParams(queryParams);
-				newUrl.searchParams.append('shpCtx', shpCtx);
-				t.url = newUrl.href;
-				t.url = `https://mobile.bahn.de/bin/mobil/query.exe/${endpoint}?${queryParams.toString()}`;
-				queryParams.delete('shpCtx'); // Remove shpCtx parameter for the next iteration
-			}
-			catch (e) {
-				// in case addDataTicketInfo is not a valid base64 string
+			const shpCtx = parseShpCtx(t.addDataTicketInfo);
+			if (shpCtx) {
+				const queryParamsWithShpCtx = new URLSearchParams(queryParams);
+				queryParamsWithShpCtx.append('shpCtx', shpCtx);
+				t.url = `https://mobile.bahn.de/bin/mobil/query.exe/${endpoint}?${queryParamsWithShpCtx.toString()}`;
+			} else {
 				t.url = null;
-				queryParams.delete('shpCtx');
 			}
 		});
 	}

@@ -261,7 +261,10 @@ const addDbOfferSelectionUrl = (journey, opt) => {
 		journey.tickets.forEach((t) => {
 			try {
 				const shpCtx = JSON.parse(atob(t.addDataTicketInfo)).shpCtx;
-				queryParams.append('shpCtx', shpCtx);
+				const newUrl = new URL(endpoint, 'https://mobile.bahn.de/bin/mobil/query.exe/');
+				newUrl.searchParams = new URLSearchParams(queryParams);
+				newUrl.searchParams.append('shpCtx', shpCtx);
+				t.url = newUrl.href;
 				t.url = `https://mobile.bahn.de/bin/mobil/query.exe/${endpoint}?${queryParams.toString()}`;
 				queryParams.delete('shpCtx'); // Remove shpCtx parameter for the next iteration
 			}

@@ -392,7 +392,11 @@ const mutateToAddTickets = (parsed, opt, j) => {
 				if (!fare.ticketL) {
 					return {
 						name: fare.buttonText,
-						priceObj: {amount: fare.price.amount}
+						priceObj: {amount: fare.price.amount},
+						isFromPrice: fare.isFromPrice,
+						isPartPrice: fare.isPartPrice,
+						isBookable: fare.isBookable,
+						isUpsell: fare.isUpsell,
 					}
 				}
 				// if refreshJourney()
